@@ -12,14 +12,17 @@ parse_device() {
 	[ "$enabled" -eq "1" ] || return 1
 	
 
-	local ip download upload comment mac interfacename
+	local ip download upload comment mac interfacename start_time end_time weekdays
 	config_get ip "$cfg" ip
 	config_get download "$cfg" "download"
 	config_get upload "$cfg" "upload"
 	config_get comment "$cfg" "comment"
 	config_get mac "$cfg" "mac"
 	config_get interfacename "$cfg" "interfacename"
-	eqos add "$ip" "$download" "$upload" "$comment" "$mac" "$interfacename"
+	onfig_get start_time "$cfg" "start_time"
+	onfig_get end_time "$cfg" "end_time"
+	onfig_get weekdays "$cfg" "weekdays"
+	eqos add "$ip" "$download" "$upload" "$comment" "$mac" "$interfacename" "$startTime" "$endTime" "$weekdays"
 }
 
 start_service() {

@@ -91,6 +91,15 @@ return view.extend({
 		o.datatype = 'and(uinteger,min(0))';
 		o.rmempty = true;
 
+		o = s.option(form.Value, 'start_time', _('Start Time'));
+		o.rmempty = true;
+
+		o = s.option(form.Value, 'end_time', _('End Time'));
+		o.rmempty = true;
+
+		o = s.option(form.Value, 'weekdays', _('weekdays'));
+		o.rmempty = true;
+
 		return m.render();
 	}
 });

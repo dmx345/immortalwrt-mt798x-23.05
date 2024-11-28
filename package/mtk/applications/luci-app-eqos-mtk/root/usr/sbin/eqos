@@ -129,6 +129,22 @@ case "$1" in
 		cnt=$(tc class show dev $dev | wc -l)
 		
 		interface="$7"
+		start_time="$8"
+		end_time="$9"
+		weekdays="${10}"
+
+		if [ -z "$startTime" ]; then
+		start_time="00:00:00"
+		fi
+
+		if [ -z "$endTime"]; then
+		end_time="23:59:59"
+		fi
+
+		if [ -z "$weekdays" ]; then
+		weekdays="1,2,3,4,5,6,7"
+		fi
+
 		if [ -n "$ip" ]; then
 		id="$(find_available_index "$ip")"
 		elif [ -n "$macaddr" ]; then
@@ -136,28 +152,28 @@ case "$1" in
 		fi
 		idpair=$((id+32))
 		if [ $id -lt 32 ]; then
-		iptables -t mangle -D eqos -s $ip -j DSCP --set-dscp ${id}
-		iptables -t mangle -D eqos -d $ip -j DSCP --set-dscp ${idpair}
-		ip6tables -t mangle -D eqos -m mac --mac-source $macaddr -j MARK --set-mark ${id}
-		ebtables -t nat -D eqos -p ipv6 -d $macaddr -j mark --mark-set ${idpair}
+		iptables -t mangle -D eqos -s $ip -j DSCP --set-dscp ${id} -m time --timestart $start_time --timestop $end_time --kerneltz --weekdays $weekdays
+		iptables -t mangle -D eqos -d $ip -j DSCP --set-dscp ${idpair} -m time --timestart $start_time --timestop $end_time --kerneltz --weekdays $weekdays
+		ip6tables -t mangle -D eqos -m mac --mac-source $macaddr -j MARK --set-mark ${id} -m time --timestart $start_time --timestop $end_time --kerneltz --weekdays $weekdays
+		ebtables -t nat -D eqos -p ipv6 -d $macaddr -j mark --mark-set ${idpair} -m time --timestart $start_time --timestop $end_time --kerneltz --weekdays $weekdays
 		if [ $up -ne 0 ]; then
 		echo 2 0 0 1 ${up} 4 1 > /sys/kernel/debug/hnat/qdma_txq${id}
-		iptables -t mangle -A eqos -s $ip -j DSCP --set-dscp ${id}
-		ip6tables -t mangle -A eqos -m mac --mac-source $macaddr -j MARK --set-mark ${id}
+		iptables -t mangle -A eqos -s $ip -j DSCP --set-dscp ${id} -m time --timestart $start_time --timestop $end_time --kerneltz --weekdays $weekdays
+		ip6tables -t mangle -A eqos -m mac --mac-source $macaddr -j MARK --set-mark ${id} -m time --timestart $start_time --timestop $end_time --kerneltz --weekdays $weekdays
 		fi
 		if [ $dl -ne 0 ]; then
 		echo 3 0 0 1 ${dl} 4 1 > /sys/kernel/debug/hnat/qdma_txq${idpair}
-		iptables -t mangle -A eqos -d $ip -j DSCP --set-dscp ${idpair}
-		ebtables -t nat -A eqos -p ipv6 -d $macaddr -j mark --mark-set ${idpair}
+		iptables -t mangle -A eqos -d $ip -j DSCP --set-dscp ${idpair} -m time --timestart $start_time --timestop $end_time --kerneltz --weekdays $weekdays
+		ebtables -t nat -A eqos -p ipv6 -d $macaddr -j mark --mark-set ${idpair} -m time --timestart $start_time --timestop $end_time --kerneltz --weekdays $weekdays
 		fi
 		else
-		iptables -t mangle -D eqos -s $ip -j MARK --set-mark 0x99
-		iptables -t mangle -D eqos -d $ip -j MARK --set-mark 0x99
+		iptables -t mangle -D eqos -s $ip -j MARK --set-mark 0x99 -m time --timestart $start_time --timestop $end_time --kerneltz --weekdays $weekdays
+		iptables -t mangle -D eqos -d $ip -j MARK --set-mark 0x99 -m time --timestart $start_time --timestop $end_time --kerneltz --weekdays $weekdays
 		if [ $up -ne 0 ]; then
-		iptables -t mangle -A eqos -s $ip -j MARK --set-mark 0x99
+		iptables -t mangle -A eqos -s $ip -j MARK --set-mark 0x99 -m time --timestart $start_time --timestop $end_time --kerneltz --weekdays $weekdays
 		fi
 		if [ $dl -ne 0 ]; then
-		iptables -t mangle -A eqos -d $ip -j MARK --set-mark 0x99
+		iptables -t mangle -A eqos -d $ip -j MARK --set-mark 0x99 -m time --timestart $start_time --timestop $end_time --kerneltz --weekdays $weekdays
 		fi
 		fi
 		if [ $id -gt 31 ]; then
