@@ -19,10 +19,10 @@ parse_device() {
 	config_get comment "$cfg" "comment"
 	config_get mac "$cfg" "mac"
 	config_get interfacename "$cfg" "interfacename"
-	onfig_get start_time "$cfg" "start_time"
-	onfig_get end_time "$cfg" "end_time"
-	onfig_get weekdays "$cfg" "weekdays"
-	eqos add "$ip" "$download" "$upload" "$comment" "$mac" "$interfacename" "$startTime" "$endTime" "$weekdays"
+	config_get start_time "$cfg" "start_time"
+	config_get end_time "$cfg" "end_time"
+	config_get weekdays "$cfg" "weekdays"
+	eqos add "$ip" "$download" "$upload" "$comment" "$mac" "$interfacename" "$start_time" "$end_time" "$weekdays"
 }
 
 start_service() {
